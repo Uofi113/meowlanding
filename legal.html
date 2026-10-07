@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Правовая информация · Lemonov Store</title>
+<meta name="description" content="Лицензия, условия использования, конфиденциальность и товарные знаки Lemonov Store.">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="canonical" href="https://store.lemonovos.com/legal.html">
+<script>
+(function () {
+  var t = null, q = new URLSearchParams(location.search).get('theme');
+  try { t = localStorage.getItem('lemonov-theme'); } catch (e) {}
+  if (q === 'light' || q === 'dark') t = q;
+  if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<style>
+:root {
+  --bg: #fbfaf9; --fg: #1b1b1f; --muted: rgba(27, 27, 31, .68); --line: rgba(0, 0, 0, .12); --soft: rgba(0, 0, 0, .045); --link: #1c64c4;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+:root[data-theme="dark"] { --bg: #1d1d21; --fg: #eeeef0; --muted: rgba(238, 238, 240, .7); --line: rgba(255, 255, 255, .14); --soft: rgba(255, 255, 255, .06); --link: #78aeed; }
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 1.0625rem/1.6 var(--sans); -webkit-font-smoothing: antialiased; transition: background-color .2s, color .2s; }
+a { color: var(--link); text-underline-offset: .18em; }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; border-radius: 4px; }
+.wrap { width: min(46rem, 100% - 2.5rem); margin-inline: auto; }
+.bar { display: flex; align-items: baseline; gap: 1.5rem; padding: 1.1rem 0; }
+.brand { display: flex; align-items: center; gap: .65rem; font-weight: 650; color: inherit; text-decoration: none; letter-spacing: -.01em; align-self: center; }
+.brand svg { width: 1.75rem; height: 1.75rem; }
+.bar nav { display: flex; align-items: baseline; gap: 1.25rem; margin-left: auto; font-size: .9375rem; }
+.bar nav a { color: var(--muted); text-decoration: none; }
+.bar nav a:hover { color: var(--fg); }
+.toggle { font: inherit; color: var(--muted); background: none; border: 0; padding: 0; cursor: pointer; }
+.toggle:hover { color: var(--fg); }
+h1 { margin: 2.5rem 0 0; font-size: clamp(2rem, 5vw, 2.75rem); line-height: 1.08; letter-spacing: -.03em; font-weight: 700; }
+.date { margin: .75rem 0 0; color: var(--muted); font-size: .9375rem; }
+h2 { margin: 3rem 0 0; padding-top: 1.5rem; border-top: 1px solid var(--line); font-size: 1.375rem; line-height: 1.25; letter-spacing: -.015em; font-weight: 650; }
+p, ul { margin: .9em 0 0; text-wrap: pretty; }
+ul { padding-left: 1.25rem; }
+li { margin-top: .35rem; }
+code { font: .88em var(--mono); background: var(--soft); padding: .08em .35em; border-radius: 4px; }
+.lead { color: var(--muted); font-size: 1.125rem; }
+footer { margin-top: 4rem; padding: 1.75rem 0 3rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .9375rem; }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 2rem; }
+footer a { color: inherit; }
+@media (prefers-reduced-motion: reduce) { body { transition: none; } }
+@media (prefers-contrast: more) { :root { --line: rgba(128, 128, 128, .7); --muted: var(--fg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <a class="brand" href="./" aria-label="Lemonov Store, на главную">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ls-mark"/></svg>
+      Lemonov Store
+    </a>
+    <nav aria-label="Разделы">
+      <a href="./">На главную</a>
+      <button class="toggle" id="theme" type="button"></button>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Правовая информация</h1>
+    <p class="date">Редакция от 7 октября 2026. Условия использования, версия 4.</p>
+    <p class="lead">Коротко: программа свободная и без гарантий, пакеты в репозиториях делают сторонние люди, сайт и программа ничего о вас не собирают.</p>
+
+    <h2>Кто делает</h2>
+    <p>Lemonov Store пишут разработчики проекта: автор Uofist и все, кто присылает изменения. Каждый участник остаётся правообладателем своего вклада, и всё распространяется на условиях одной лицензии. Юридического лица нет. Связаться можно по адресу <a href="mailto:author@lemonovos.com">author@lemonovos.com</a>.</p>
+
+    <h2>Лицензия и отсутствие гарантий</h2>
+    <p>Lemonov Store распространяется на условиях GNU General Public License версии 3 или любой более поздней (GPL-3.0-or-later). Текст лежит в файле <code>LICENSE</code> в исходном коде. Это свободная программа: её можно запускать, изучать, менять и распространять по условиям этой лицензии.</p>
+    <p>Программа распространяется без каких-либо гарантий в пределах, допустимых законом (разделы 15 и 16 GPL-3.0). Она использует libalpm (GPL-2.0-or-later), GTK 4 и libadwaita (LGPL-2.1-or-later) и значки Papirus Icon Theme (GPL-3.0) у части консольных утилит.</p>
+
+    <h2>Пакеты из репозиториев</h2>
+    <p>Lemonov Store ставит программы из репозиториев, указанных в вашем <code>pacman.conf</code>: обычно это репозитории Arch Linux. Их делают и подписывают сторонние люди, а не разработчики Lemonov Store, включая тех, кто присылает изменения. Lemonov Store не создаёт эти пакеты, не проверяет их содержимое и не управляет серверами, зеркалами и базами пакетов.</p>
+    <p>Если репозиторий, зеркало или база пакетов будут взломаны или повреждены, вредоносный пакет может оказаться на вашем компьютере. Подписи пакетов проверяет библиотека libalpm по настройкам <code>SigLevel</code> в вашем <code>pacman.conf</code> и по ключам вашей системы, но это не защищает от всех сбоев и взломов.</p>
+    <p>Установка и обновление выполняются с правами администратора. Программа открытая и распространяется без гарантий. Её пишут разработчики Lemonov Store, включая всех, кто присылает изменения; изменения просматриваются перед принятием, но это не гарантирует отсутствия ошибок. В пределах, допустимых законом, ни один из разработчиков не отвечает за вред, потерю данных и другие последствия.</p>
+    <p>При первом запуске программа показывает эти условия, и без галочки «прочитал(а) условия и понимаю риски» можно только выйти. Согласие дописывается в файл <code>~/.local/share/lemonov-store/consent.log</code> на вашем компьютере: время и версия условий. Файл никуда не отправляется. Он ваш, его можно читать и удалять. Принятая версия условий хранится в настройках программы.</p>
+    <p>Установки из AUR в программе нет сознательно: это чужие сборочные скрипты, которые выполняются с вашими правами.</p>
+
+    <h2>Ваши права</h2>
+    <p>Ничто на этой странице и в программе не исключает и не ограничивает ответственность, которую закон не позволяет исключить или ограничить, и не отменяет прав потребителя по законам вашей страны.</p>
+
+    <h2>Конфиденциальность</h2>
+    <p><strong>Сайт.</strong> Страница не использует cookies, аналитику, счётчики и внешние ресурсы. В браузере сохраняется только выбранная тема (<code>localStorage</code>, ключ <code>lemonov-theme</code>); её можно стереть в настройках браузера. Хостинг, на котором лежит сайт, может вести обычные журналы запросов (IP-адрес, время, адрес страницы) по своим правилам.</p>
+    <p><strong>Программа.</strong> Lemonov Store не собирает данные о вас и не отправляет их нам. Его обращения к сети такие же, как у pacman: зеркала репозиториев из вашего <code>pacman.conf</code>. Ссылки в программе (например, сайт пакета или страница проекта) открываются в вашем браузере только по вашему клику, и тогда сайт видит обычный запрос посетителя. Настройки и журнал согласий лежат только в вашем профиле.</p>
+
+    <h2>Пожертвования</h2>
+    <p>Lemonov Store бесплатный, код открыт, и платным он не станет. Проект поддерживается добровольными пожертвованиями. Пожертвование не является платой за программу и не даёт ничего взамен: ни приоритетной поддержки, ни особых функций, ни гарантий. Оно не создаёт никаких обязательств ни у вас, ни у разработчиков.</p>
+
+    <h2>Товарные знаки</h2>
+    <p>Названия Lemonov Store и LemonovOS не зарегистрированы как товарные знаки. Названия и значки Steam, Valve, Firefox, OBS Studio, VLC, Lutris и других программ на скриншотах принадлежат их владельцам. Они показаны, чтобы было видно, как выглядит магазин. Lemonov Store с этими проектами не связан и ими не одобрен. Подборка «Выбор LemonovOS» отражает выбор проекта LemonovOS, а не выбор владельцев этих программ. Arch Linux является товарным знаком своего владельца.</p>
+
+    <h2>Что делать, если нашли нарушение</h2>
+    <p>Если вы правообладатель и считаете, что что-то на сайте нарушает ваши права, или нашли ошибку в этом тексте, напишите на <a href="mailto:author@lemonovos.com">author@lemonovos.com</a>. Мы рассмотрим обращение.</p>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span><a href="./">Lemonov Store</a> входит в проект <a href="https://lemonovos.com">LemonovOS</a>.</span>
+    <span>© 2026 Uofist и участники Lemonov Store · GPL-3.0-or-later</span>
+  </div>
+</footer>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="ls-bg" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#34343f"/><stop offset="1" stop-color="#121215"/></linearGradient>
+    <symbol id="ls-mark" viewBox="0 0 64 64">
+      <path d="M32 0C3 0 0 3 0 32s3 32 32 32 32-3 32-32S61 0 32 0Z" fill="url(#ls-bg)"/>
+      <path d="M32 .5C3.5 .5 .5 3.5 .5 32s3 31.5 31.5 31.5S63.5 60.5 63.5 32 60.5 .5 32 .5Z" fill="none" stroke="#fff" stroke-opacity=".1"/>
+      <path d="M14 47 32 17l18 30" fill="none" stroke="#f5c542" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M25 47h14" stroke="#f5c542" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+    </symbol>
+  </defs>
+</svg>
+<script>
+(function () {
+  var root = document.documentElement, btn = document.getElementById('theme');
+  function label() { btn.textContent = root.dataset.theme === 'dark' ? 'Светлая тема' : 'Тёмная тема'; }
+  btn.addEventListener('click', function () {
+    var t = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = t; label();
+    try { localStorage.setItem('lemonov-theme', t); } catch (e) {}
+  });
+  label();
+})();
+</script>
+</body>
+</html>

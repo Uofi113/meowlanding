@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lemonov Store, магазин приложений для LemonovOS</title>
+<meta name="description" content="Lemonov Store: магазин пакетов для LemonovOS на Rust и GTK4. Читает базы pacman, ставит через libalpm, показывает честные данные и журнал. Скоро.">
+<meta name="color-scheme" content="dark light">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lemonov Store, магазин приложений для LemonovOS">
+<meta property="og:description" content="Читает те же базы, что и pacman, ставит через libalpm, показывает честные данные и журнал.">
+<meta property="og:image" content="https://store.lemonovos.com/assets/og.png">
+<meta property="og:url" content="https://store.lemonovos.com/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="canonical" href="https://store.lemonovos.com/">
+<script>
+/* Тема выбирается до первой отрисовки. ?theme=light или ?theme=dark открывают страницу сразу в нужной теме. */
+(function () {
+  var t = null, q = new URLSearchParams(location.search).get('theme');
+  try { t = localStorage.getItem('lemonov-theme'); } catch (e) {}
+  if (q === 'light' || q === 'dark') t = q;
+  if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<style>
+:root {
+  --bg: #fbfaf9; --fg: #1b1b1f; --muted: rgba(27, 27, 31, .68); --line: rgba(0, 0, 0, .12); --soft: rgba(0, 0, 0, .045);
+  --link: #1c64c4; --log-bg: #f3f2f0; --log-dim: #6b6b75; --log-acc: #1c71d8;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+:root[data-theme="dark"] {
+  --bg: #1d1d21; --fg: #eeeef0; --muted: rgba(238, 238, 240, .7); --line: rgba(255, 255, 255, .14); --soft: rgba(255, 255, 255, .06);
+  --link: #78aeed; --log-bg: #121214; --log-dim: #8b8b94; --log-acc: #78aeed;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 400 1.0625rem/1.6 var(--sans); -webkit-font-smoothing: antialiased;
+  transition: background-color .2s, color .2s;
+}
+img { display: block; max-width: 100%; height: auto; }
+a { color: var(--link); text-underline-offset: .18em; }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; border-radius: 4px; }
+.wrap { width: min(70rem, 100% - 2.5rem); margin-inline: auto; }
+.skip { position: absolute; left: 1rem; top: -4rem; padding: .5rem .8rem; background: var(--fg); color: var(--bg); border-radius: 6px; z-index: 10; }
+.skip:focus { top: 1rem; }
+
+/* шапка */
+.bar { display: flex; align-items: center; gap: 1.5rem; padding: 1.1rem 0; }
+.brand { display: flex; align-items: center; gap: .65rem; font-weight: 650; color: inherit; text-decoration: none; letter-spacing: -.01em; }
+.brand svg { width: 1.75rem; height: 1.75rem; }
+.bar nav { display: flex; align-items: baseline; gap: 1.25rem; margin-left: auto; font-size: .9375rem; line-height: 1.6; }
+.bar nav a { color: var(--muted); text-decoration: none; }
+.bar nav a:hover { color: var(--fg); }
+.toggle { font: inherit; color: var(--muted); background: none; border: 0; padding: 0; cursor: pointer; }
+.toggle:hover { color: var(--fg); }
+.toggle:active { opacity: .6; }
+
+/* первый экран */
+.hero { padding: 4rem 0 0; }
+h1 { margin: 0; font-size: clamp(2.5rem, 6vw, 3.75rem); line-height: 1.04; letter-spacing: -.035em; font-weight: 700; }
+.lead { max-width: 38rem; margin: 1.25rem 0 0; font-size: 1.25rem; line-height: 1.45; letter-spacing: -.005em; color: var(--muted); text-wrap: pretty; }
+.lead strong { color: var(--fg); font-weight: 600; }
+.get { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; margin-top: 2rem; }
+.btn { font: inherit; font-weight: 600; padding: .7rem 1.4rem; border-radius: 999px; border: 1px solid var(--line); background: var(--soft); color: var(--muted); cursor: not-allowed; }
+.get small { font-size: .9375rem; color: var(--muted); }
+
+/* окно приложения */
+.shot { margin: 0; }
+.shot img { width: 100%; border-radius: 12px; box-shadow: 0 0 0 1px var(--line), 0 18px 48px -18px rgba(0, 0, 0, .35); }
+:root[data-theme="dark"] .shot img { box-shadow: 0 0 0 1px var(--line), 0 24px 60px -20px rgba(0, 0, 0, .7); }
+:root[data-theme="dark"] .light, :root[data-theme="light"] .dark { display: none; }
+.shot figcaption { margin-top: .85rem; font-size: .9375rem; color: var(--muted); max-width: 44rem; text-wrap: pretty; }
+.hero .shot { margin-top: 3.25rem; }
+
+/* разделы: заголовок слева, текст справа */
+section { display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: 1rem 3rem; padding: 3.5rem 0 0; margin-top: 3.5rem; border-top: 1px solid var(--line); }
+h2 { margin: 0; font-size: 1.5rem; line-height: 1.2; letter-spacing: -.02em; font-weight: 650; }
+.body > :first-child { margin-top: 0; }
+p { margin: 1em 0 0; max-width: 40rem; text-wrap: pretty; }
+.wide { grid-column: 1 / -1; }
+code { font: .88em var(--mono); background: var(--soft); padding: .08em .35em; border-radius: 4px; }
+.note { margin: 1.5rem 0 0; padding: .1rem 0 .1rem 1.1rem; border-left: 3px solid var(--fg); max-width: 40rem; }
+.note p { margin: .5em 0; }
+
+/* перечни */
+dl { margin: 0; }
+.row { display: grid; grid-template-columns: 12rem minmax(0, 1fr); gap: .25rem 2rem; padding: 1rem 0; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; padding-top: 0; }
+dt { font-weight: 600; }
+dd { margin: 0; color: var(--muted); max-width: 36rem; text-wrap: pretty; }
+
+/* устройство и журнал */
+pre { margin: 1.25rem 0 0; font: .875rem/1.65 var(--mono); overflow-x: auto; }
+.scheme { max-width: 40rem; }
+.scheme b { font-weight: 600; }
+.log { padding: 1rem 1.25rem; border-radius: 10px; background: var(--log-bg); box-shadow: 0 0 0 1px var(--line); color: var(--fg); }
+.log .t { color: var(--log-dim); } .log .a { color: var(--log-acc); }
+h3 { margin: 1.75rem 0 0; font-size: 1.0625rem; font-weight: 650; letter-spacing: -.01em; }
+h3 + p { margin-top: .35em; color: var(--muted); }
+
+footer { margin-top: 5rem; padding: 1.75rem 0 3rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .9375rem; }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 2rem; }
+footer a { color: inherit; }
+
+@media (max-width: 860px) {
+  section { grid-template-columns: minmax(0, 1fr); padding-top: 2.5rem; margin-top: 2.5rem; }
+  .row { grid-template-columns: 1fr; }
+  .bar nav a:not(:last-child) { display: none; }
+}
+@media (max-width: 520px) {
+  .wrap { width: min(70rem, 100% - 2rem); }
+  .hero { padding-top: 2.5rem; }
+  .lead { font-size: 1.125rem; }
+  .shot img { border-radius: 8px; }
+  .btn { width: 100%; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) { body { transition: none; } }
+@media (prefers-contrast: more) { :root { --line: rgba(128, 128, 128, .7); --muted: var(--fg); } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">К содержимому</a>
+
+<div class="wrap">
+  <header class="bar">
+    <a class="brand" href="#" aria-label="Lemonov Store, в начало">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ls-mark"/></svg>
+      Lemonov Store
+    </a>
+    <nav aria-label="Разделы">
+      <a href="#works">Что работает</a>
+      <a href="#how">Устройство</a>
+      <a href="#risks">Пакеты</a>
+      <button class="toggle" id="theme" type="button"></button>
+    </nav>
+  </header>
+</div>
+
+<main id="main">
+<div class="wrap hero">
+  <h1>Lemonov Store</h1>
+  <p class="lead">Магазин приложений для LemonovOS. Он <strong>читает те же базы, что и pacman</strong>, и ставит пакеты через libalpm. Своей базы пакетов у него нет.</p>
+  <div class="get">
+    <button class="btn" type="button" disabled>Скачать · скоро</button>
+    <small>Версия 0.1, в разработке.</small>
+  </div>
+
+  <figure class="shot">
+    <img class="dark" src="assets/shots/today-dark.webp" width="2720" height="1720" alt="Окно Lemonov Store, вкладка «Сегодня»: Steam как выбор LemonovOS и подборка «Мастхэв для старта»" fetchpriority="high">
+    <img class="light" src="assets/shots/today-light.webp" width="2720" height="1720" alt="Окно Lemonov Store в светлой теме, вкладка «Сегодня»" fetchpriority="high">
+    <figcaption>Названия и значки Steam, Firefox, OBS, VLC и других программ на снимках принадлежат их владельцам и показаны для иллюстрации. Lemonov Store с ними не связан.</figcaption>
+  </figure>
+</div>
+
+<div class="wrap">
+  <section id="works" aria-labelledby="h-works">
+    <h2 id="h-works">Что уже работает</h2>
+    <div class="body">
+      <dl>
+        <div class="row"><dt>Каталог</dt><dd>Версия, размеры, лицензия и зависимости берутся из баз pacman, как у <code>pacman -Si</code>. Названия и иконки приложений приходят из AppStream. Оценок и числа скачиваний нет: в репозиториях Arch таких данных нет, а выдумывать их мы не стали.</dd></div>
+        <div class="row"><dt>Установка и обновление</dt><dd>Задачи идут в очереди по одной, как этого требует pacman. Перед установкой программа обновляет базы, а если в системе ждут обновления, просит сначала обновить её целиком: Arch не поддерживает частичные обновления. Поэтому кнопка «Обновить» у одного пакета обновляет всё. Пакет можно заблокировать, и он не попадёт в обновления.</dd></div>
+        <div class="row"><dt>Журнал</dt><dd>Внизу окна видна текущая стадия, а <code>Ctrl+J</code> открывает журнал alpm целиком. Установку можно отменить, пока пакеты ещё не записываются на диск.</dd></div>
+        <div class="row"><dt>Запуск</dt><dd>У графических приложений есть кнопка «Запустить». Пока приложение работает, она превращается в зелёную «Запущено».</dd></div>
+        <div class="row"><dt>Установленное</dt><dd>Полоса хранилища показывает, сколько места занимают игры, приложения, разработка и система. Нажатие на категорию фильтрует список. Если пакет поставили в терминале, список в окне обновится сам.</dd></div>
+        <div class="row"><dt>Права</dt><dd>Окно работает от обычного пользователя. Пароль у вас спрашивает polkit, и только когда нужно что-то изменить в системе.</dd></div>
+        <div class="row"><dt>Вид</dt><dd>Светлая и тёмная тема, синий или золотой акцент, кнопки окна справа или слева.</dd></div>
+      </dl>
+    </div>
+
+    <figure class="shot wide">
+      <img class="dark" src="assets/shots/package-dark.webp" width="2720" height="1720" alt="Страница пакета Steam: версия, размеры, лицензия, репозиторий и список зависимостей, тёмная тема" loading="lazy">
+      <img class="light" src="assets/shots/package-light.webp" width="2720" height="1720" alt="Страница пакета Steam в светлой теме" loading="lazy">
+      <figcaption>Страница пакета. Только поля из базы, зависимости плашками, уже установленные отмечены галочкой.</figcaption>
+    </figure>
+    <figure class="shot wide">
+      <img class="dark" src="assets/shots/installed-dark.webp" width="2720" height="1720" alt="Страница «Установлено» с полосой хранилища по категориям, тёмная тема" loading="lazy">
+      <img class="light" src="assets/shots/installed-light.webp" width="2720" height="1720" alt="Страница «Установлено» в светлой теме" loading="lazy">
+      <figcaption>Установленное: хранилище по категориям, фильтры, меню «⋯» у каждого пакета.</figcaption>
+    </figure>
+    <figure class="shot wide">
+      <img class="dark" src="assets/shots/build-dark.webp" width="2720" height="1720" alt="Страница «Загрузки»: установка VLC завершена, внизу открыт журнал pacman, тёмная тема" loading="lazy">
+      <img class="light" src="assets/shots/build-light.webp" width="2720" height="1720" alt="Страница «Загрузки» с завершённой установкой VLC и журналом pacman, светлая тема" loading="lazy">
+      <figcaption>Загрузки: завершённая установка и журнал pacman под ней.</figcaption>
+    </figure>
+  </section>
+
+  <section id="how" aria-labelledby="h-how">
+    <h2 id="h-how">Устройство</h2>
+    <div class="body">
+      <p>Программ две. Окно рисует интерфейс и ничего не меняет в системе. Транзакции выполняет маленький помощник, который запускается от root через polkit только на время работы.</p>
+<pre class="scheme"><b>lemonov-store</b>    окно, ваш пользователь
+   │ события в JSON
+<b>lemonov-helper</b>   root, через polkit
+   │ libalpm
+<b>базы pacman</b>   те же, что у pacman</pre>
+      <p>Помощник проверяет имена пакетов, которые получает от окна, и принимает только известные команды: установить, обновить, переустановить, удалить, обновить базы, очистить кэш и заблокировать обновления.</p>
+      <p>Так выглядит журнал в приложении при установке:</p>
+<pre class="log"><span class="t">16:07:08</span>  checking keys in keyring
+<span class="t">16:07:08</span>  checking package integrity
+<span class="t">16:07:08</span>  loading package files
+<span class="t">16:07:08</span>  checking for file conflicts
+<span class="t">16:07:08</span>  <span class="a">:: Processing package changes...</span>
+<span class="t">16:07:08</span>  (1/2) installing fzf
+<span class="t">16:07:08</span>  (2/2) installing pacman-contrib
+<span class="t">16:07:08</span>  <span class="a">:: Running post-transaction hooks...</span></pre>
+    </div>
+  </section>
+
+  <section id="risks" aria-labelledby="h-risks">
+    <h2 id="h-risks">О пакетах</h2>
+    <div class="body">
+      <p>Пакеты в репозиториях делают и подписывают сторонние люди, а не разработчики Lemonov Store. Разработчики не создают их, не проверяют содержимое и не управляют серверами, зеркалами и базами пакетов. Подписи проверяет libalpm по настройкам вашего <code>pacman.conf</code>.</p>
+      <div class="note">
+        <p><strong>Если репозиторий, зеркало или база пакетов будут взломаны, вредоносный пакет может попасть на ваш компьютер.</strong> В пределах, допустимых законом, разработчики Lemonov Store (включая тех, кто присылает изменения) за это не отвечают. Установки из AUR в программе нет сознательно: это чужие сборочные скрипты, которые выполняются с вашими правами.</p>
+      </div>
+      <p>При первом запуске программа показывает эти условия и просит поставить галочку. Подробности и лицензия: <a href="legal.html">правовая информация</a>.</p>
+    </div>
+  </section>
+
+  <section id="status" aria-labelledby="h-status">
+    <h2 id="h-status">Чего ещё нет</h2>
+    <div class="body">
+      <dl>
+        <div class="row"><dt>Репозиторий LemonovOS</dt><dd>Для него нужны сам репозиторий и его ключи. Пока магазин видит те репозитории, которые прописаны в <code>pacman.conf</code>.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section id="faq" aria-labelledby="h-faq">
+    <h2 id="h-faq">Вопросы</h2>
+    <div class="body">
+      <h3 style="margin-top:0">Когда можно будет скачать?</h3>
+      <p>Скоро. Версия 0.1 уже собирается и работает, мы доводим её до выпуска. Кнопка наверху станет ссылкой, когда появится первая сборка.</p>
+      <h3>Это работает только в LemonovOS?</h3>
+      <p>Нужен pacman. Мы проверяли на обычном Arch Linux: каталог, установка, обновление и удаление работают так же.</p>
+      <h3>Магазин ставит что-нибудь в обход pacman?</h3>
+      <p>Нет. Пакеты ставятся через libalpm. Своей базы пакетов у программы нет.</p>
+      <h3>Будет ли AUR?</h3>
+      <p>Нет. Это чужие сборочные скрипты с вашими правами, и мы не хотим отвечать за такую установку. Для AUR есть отдельные инструменты, и пользоваться ими вы можете сами, в терминале.</p>
+      <h3>Сколько он потребляет?</h3>
+      <p>По нашим замерам релизной сборки на Arch: около 150 МБ памяти в покое (при запуске на несколько секунд до 250 МБ) и нулевая нагрузка на процессор, пока вы ничего не делаете. На другом железе цифры будут другими.</p>
+    </div>
+  </section>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Lemonov Store входит в проект <a href="https://lemonovos.com">LemonovOS</a>.</span>
+    <span><a href="legal.html">Правовая информация</a> · <a href="mailto:author@lemonovos.com">author@lemonovos.com</a> · © 2026 Uofist и участники Lemonov Store · GPL-3.0-or-later</span>
+    <small style="flex-basis:100%">Названия и значки сторонних программ на скриншотах принадлежат их владельцам и показаны для иллюстрации. Lemonov Store с ними не связан.</small>
+  </div>
+</footer>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="ls-bg" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#34343f"/><stop offset="1" stop-color="#121215"/></linearGradient>
+    <symbol id="ls-mark" viewBox="0 0 64 64">
+      <path d="M32 0C3 0 0 3 0 32s3 32 32 32 32-3 32-32S61 0 32 0Z" fill="url(#ls-bg)"/>
+      <path d="M32 .5C3.5 .5 .5 3.5 .5 32s3 31.5 31.5 31.5S63.5 60.5 63.5 32 60.5 .5 32 .5Z" fill="none" stroke="#fff" stroke-opacity=".1"/>
+      <path d="M14 47 32 17l18 30" fill="none" stroke="#f5c542" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M25 47h14" stroke="#f5c542" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+    </symbol>
+  </defs>
+</svg>
+
+<script>
+(function () {
+  var root = document.documentElement, btn = document.getElementById('theme');
+  function label() { btn.textContent = root.dataset.theme === 'dark' ? 'Светлая тема' : 'Тёмная тема'; }
+  btn.addEventListener('click', function () {
+    var t = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = t; label();
+    try { localStorage.setItem('lemonov-theme', t); } catch (e) {}
+  });
+  label();
+})();
+</script>
+</body>
+</html>
